@@ -47,16 +47,28 @@ let rec calculate tree =
     | UNode(a, SIN)         -> sin (calculate a)
 ;;
 
+let rec distribute tree = 
+    match tree with
+      Node (a, MUL , Node (b, PLUS, c)) -> 
+          let a' = distribute a
+          and b' = distribute b
+          and c' = distribute c in
+          distribute
+          (Node(
+              Node (a', MUL, b'),
+              PLUS,
+              Node (a', MUL, c')))
+    | Node (a, op, b) -> 
+            let a' = distribute a
+            and b' = distribute b in
+            Node (a', op, b')
+    | t -> t
+;;
+
 let _ = 
-    let lexbuf = Lexing.from_string "(sin (-2.0 * 1.0)) ^ 2.4 + x" in
+    let lexbuf = Lexing.from_string "3.0 * (x * (y + z) + 2.0 * (x + y))" in
     let result = Parser.main Lexer.token lexbuf in
-(*    Printf.printf "%f\n" result*)
-    let a  = Node ( Node (Leaf 2., PLUS, UNode(Leaf 2., SIN)), MUL, Node (Leaf 3., DIV, Leaf 3.)) in
-    traverse result (Printf.printf "%s ") (Printf.printf "%f ");
+    let result' = distribute result in
+    traverse result' (Printf.printf "%s ") (Printf.printf "%f ");
     Printf.printf "\n";
-(*    traverse a (Printf.printf " %s ") (Printf.printf " %f ");
-    Printf.printf "\n";*)
- 
-(*    let b = calculate a in
-    Printf.printf "%f\n" b*)
 ;;

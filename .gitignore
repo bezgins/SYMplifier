@@ -8,3 +8,4 @@ parser.mli
 parser.ml
 *.o
 *.output
+*.sw?
