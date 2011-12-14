@@ -1,0 +1,10 @@
+*~
+*.cm?
+ast
+*.dat
+*.png
+lexer.ml
+parser.mli
+parser.ml
+*.o
+*.output
