@@ -61,8 +61,11 @@ let rec traverse_gv' tree first n =
       (* Для бинарных операторов *)
     | Node (a, op, b)   ->
             (* получаем описания детей *)
-            let (left_name, left_val, left_st)   = get_node a (n+1)
-            and (right_name, right_val, right_st) = get_node b (n+2) in
+            let (left_name, left_val, left_st)   = get_node a (!n+1)
+            and (right_name, right_val, right_st) = get_node b (!n+2) in
+            let _ = (n := !n+2) in
+            let left_str  = (traverse_gv' a left_name n) 
+            and right_str = (traverse_gv' b right_name n) in
             (* печатаем ноды детей и связи*)
             (Printf.sprintf "%s [label=\"%s\" shape=%s]\n"
                             left_name left_val left_st)^ 
@@ -77,19 +80,21 @@ let rec traverse_gv' tree first n =
             (Printf.sprintf "%s -- %s [style=invis]\n\n"
                             left_name right_name) ^
             (* Рекурсивно спускаемся на уровень ниже *)
-            (traverse_gv' a left_name (n+3)) ^
-            (traverse_gv' b right_name (n+4))
+            left_str ^
+            right_str
       (* Унарные операторы *)
     | UNode (a, op)     ->
             (* описание ребенка *)
-            let (left_name, left_val, left_st)   = get_node a (n+1) in
+            let (left_name, left_val, left_st)   = get_node a (!n+1) in
+            let _ = (n:=!n+1) in
+            let child_str = (traverse_gv' a left_name n) in
             (* напечатаем детей и связи*)
             (Printf.sprintf "%s [label=\"%s\" shape=%s]\n"
                             left_name left_val left_st)^ 
-            (Printf.sprintf "%s -- %s "
+            (Printf.sprintf "%s -- %s \n\n"
                             first left_name) ^
             (* рекурсивно спускаемся ниже *)
-            (traverse_gv' a left_name (n+2)) 
+            child_str
 ;;
 
 
@@ -117,7 +122,8 @@ let traverse_gv tree name =
     in
     (* Напечатаем шапка - первая нода - все остальное - подвал*)
     let first = Printf.sprintf "%s [label=\"%s\"]\n" first_name first_val
-    and rest  = traverse_gv' tree first_name 1 in
+    and n = ref 1 in
+    let rest  = traverse_gv' tree first_name n in
     header^first^rest^footer
 ;;
 
